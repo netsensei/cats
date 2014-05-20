@@ -1,0 +1,13 @@
+{
+  "name": "Cats",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "grunt-open": "~0.2.0",
+    "path": "~0.4.9",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-contrib-jshint": "~0.7.2"
+  }
+}

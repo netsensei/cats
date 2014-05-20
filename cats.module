@@ -1,0 +1,47 @@
+<?php
+
+/**
+ * @file
+ *   My cool cats Angular App module
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function cats_menu() {
+  $items['cats'] = array(
+    'title' => 'All cats',
+    'page callback' => 'cats_page',
+    'access arguments' => array('access content'),
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function cats_theme() {
+  return array(
+    'all_cats' => array(
+      'template' => 'all-cats',
+    ),
+  );
+}
+
+/**
+ * Cats page callback
+ */
+function cats_page() {
+  // Set the path
+  $path = drupal_get_path('module', 'cats');
+
+  // Load angular
+  drupal_add_library('angularjs', 'angularjs');
+
+  // Load the app
+  drupal_add_js($path . '/js/cats.gen.js');
+
+  // Return the HTML template
+  return theme('all_cats');
+}
