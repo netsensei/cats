@@ -22,7 +22,8 @@ module.exports = function (grunt) {
       },
       all: [
         'js/**/*.js',
-        '!js/**/*.gen.js'
+        '!js/**/*.gen.js',
+        '!js/**/vendor/*.js'
       ]
     },
   });
