@@ -42,6 +42,8 @@ function cats_page() {
   // Load the app
   drupal_add_js($path . '/js/cats.gen.js');
 
+  drupal_add_css($path . '/css/bootstrap.css');
+
   // Return the HTML template
   return theme('all_cats');
 }

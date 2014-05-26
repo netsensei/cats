@@ -1,4 +1,4 @@
-var cats = angular.module('cats', []);
+var cats = angular.module('cats', ['ui.bootstrap']);
 
 jQuery(document).ready(function() {
   /**

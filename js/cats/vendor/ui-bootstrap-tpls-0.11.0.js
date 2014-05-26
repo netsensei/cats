@@ -1,38 +1,3 @@
-var cats = angular.module('cats', ['ui.bootstrap']);
-
-jQuery(document).ready(function() {
-  /**
-   * We are initialization the angular app by hand and not with the Automatic
-   * Initialization.
-   * The reason for this is that we are loading multiple angular apps on one
-   * page and the Automatic Initialization can only handle 1 app per page.
-   *
-   * @link http://docs.angularjs.org/guide/bootstrap
-   */
-  angular.bootstrap(document.getElementById('cats-app'),['cats']);
-});
-
-cats.controller('catsController', function ($scope, $http) {
-  $scope.currentPage = 1;
-  $scope.itemsPerPage = 2;
-
-  $http.get('/json/cats').success(function (result) {
-    $scope.allCats = (function() {
-      return result.nodes;
-    })();
-
-    $scope.totalItems = $scope.allCats.length;
-
-    $scope.cats = $scope.allCats.slice(0, $scope.itemsPerPage);
-  });
-
-  $scope.pageChanged = function (currentPage) {
-    var start = (currentPage - 1) * $scope.itemsPerPage;
-    var end = start + $scope.itemsPerPage;
-    $scope.cats = $scope.allCats.slice(start, end);
-  };
-});
-
 /*
  * angular-ui-bootstrap
  * http://angular-ui.github.io/bootstrap/
