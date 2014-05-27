@@ -2,7 +2,8 @@ cats.controller('catsController', function ($scope, $http) {
   $scope.currentPage = 1;
   $scope.itemsPerPage = 2;
 
-  $http.get('/json/cats').success(function (result) {
+  $http.get('/json/custom-api/cats').success(function (result) {
+
     $scope.allCats = (function() {
       return result.nodes;
     })();

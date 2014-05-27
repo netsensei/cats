@@ -15,6 +15,12 @@ function cats_menu() {
     'access arguments' => array('access content'),
   );
 
+  $items['json/custom-api/cats'] = array(
+    'title' => 'All cats',
+    'page callback' => 'cats_json_endpoint_page',
+    'access arguments' => array('access content')
+  );
+
   return $items;
 }
 
@@ -46,4 +52,50 @@ function cats_page() {
 
   // Return the HTML template
   return theme('all_cats');
+}
+
+/**
+ * Page callback
+ */
+function cats_json_endpoint_page() {
+  header('Content-type: application/json');
+  print json_encode(get_all_cats_json_array());
+  exit();
+}
+
+/**
+ * All cats as JSON ready array
+ */
+function get_all_cats_json_array() {
+  $cats = array();
+
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'cat')
+    ->propertyCondition('status', 1)
+    ->range(0, 10);
+
+  $result = $query->execute();
+
+  $json_cats = array();
+  if (isset($result['node'])) {
+    $cats_nids = array_keys($result['node']);
+    $cats = entity_load('node', $cats_nids);
+    foreach ($cats as $cat) {
+      $cat_wrapper = entity_metadata_wrapper('node', $cat);
+
+      $body = $cat_wrapper->body->value();
+      $image = $cat_wrapper->field_cat_image->value();
+
+      $json_cats['nodes'][] = array(
+        'node' => array(
+          'title' => $cat->title,
+          'Body' => $body['value'],
+          'Image' => image_style_url('medium', $image['uri']),
+         ),
+      );
+    }
+  }
+
+  return $json_cats;
 }
