@@ -1,21 +1,23 @@
-cats.controller('catsController', function ($scope, $http) {
+cats.controller('catsController', function ($scope, search) {
   $scope.currentPage = 1;
   $scope.itemsPerPage = 2;
+  $scope.cats = [];
 
-  $http.get('/json/custom-api/cats').success(function (result) {
+  $scope.launchSearch = function () {
+    var promise = search.getResults({
+      'page' : $scope.currentPage,
+      'items_per_page' : $scope.itemsPerPage
+    });
 
-    $scope.allCats = (function() {
-      return result.nodes;
-    })();
+    promise.then(function (result) {
+      $scope.cats = result.nodes;
+      $scope.totalItems = result.total;
+    });
+  };
 
-    $scope.totalItems = $scope.allCats.length;
+  $scope.launchSearch();
 
-    $scope.cats = $scope.allCats.slice(0, $scope.itemsPerPage);
-  });
-
-  $scope.pageChanged = function (currentPage) {
-    var start = (currentPage - 1) * $scope.itemsPerPage;
-    var end = start + $scope.itemsPerPage;
-    $scope.cats = $scope.allCats.slice(start, end);
+  $scope.pageChanged = function () {
+    $scope.launchSearch();
   };
 });

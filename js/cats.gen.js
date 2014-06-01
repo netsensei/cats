@@ -12,27 +12,52 @@ jQuery(document).ready(function() {
   angular.bootstrap(document.getElementById('cats-app'),['cats']);
 });
 
-cats.controller('catsController', function ($scope, $http) {
+cats.controller('catsController', function ($scope, search) {
   $scope.currentPage = 1;
   $scope.itemsPerPage = 2;
+  $scope.cats = [];
 
-  $http.get('/json/custom-api/cats').success(function (result) {
+  $scope.launchSearch = function () {
+    var promise = search.getResults({
+      'page' : $scope.currentPage,
+      'items_per_page' : $scope.itemsPerPage
+    });
 
-    $scope.allCats = (function() {
-      return result.nodes;
-    })();
+    promise.then(function (result) {
+      $scope.cats = result.nodes;
+      $scope.totalItems = result.total;
+    });
+  };
 
-    $scope.totalItems = $scope.allCats.length;
+  $scope.launchSearch();
 
-    $scope.cats = $scope.allCats.slice(0, $scope.itemsPerPage);
-  });
-
-  $scope.pageChanged = function (currentPage) {
-    var start = (currentPage - 1) * $scope.itemsPerPage;
-    var end = start + $scope.itemsPerPage;
-    $scope.cats = $scope.allCats.slice(start, end);
+  $scope.pageChanged = function () {
+    $scope.launchSearch();
   };
 });
+
+/**
+ * Cats 'search' service
+ */
+cats.service('search', ['$http', '$q' ,function($http, $q){
+
+  var url = '/json/custom-api/cats';
+
+  var getResults = function (query){
+    var deferred = $q.defer();
+    var config = {
+      params : query
+    };
+    var getUrl = url;
+    $http.get(getUrl ,config).success(function(result) {
+      deferred.resolve(result);
+    });
+    return deferred.promise;
+  };
+  return {
+    getResults: getResults
+  };
+}]);
 
 /*
  * angular-ui-bootstrap

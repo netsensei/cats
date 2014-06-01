@@ -58,30 +58,65 @@ function cats_page() {
  * Page callback
  */
 function cats_json_endpoint_page() {
+  // Let a HTTP client now we are going to serve JSON
   header('Content-type: application/json');
+  // Print JSON to screen.
   print json_encode(get_all_cats_json_array());
+  // Halt Drupal execution. We don't need the theming layer to kick in here.
   exit();
 }
 
 /**
- * All cats as JSON ready array
+ * Fetch cats as JSON ready array
  */
 function get_all_cats_json_array() {
   $cats = array();
+
+  // Fetch the page & items_per_page parameters
+  $page = $_GET['page'];
+  $items_per_page = $_GET['items_per_page'];
+
+  // Calculate the offset position within the result set. This is where the
+  // 'slice' of results for the current page will be calculated from.
+  $offset = ($page - 1) * $items_per_page;
 
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'node')
     ->entityCondition('bundle', 'cat')
     ->propertyCondition('status', 1)
-    ->range(0, 10);
+    ->range($offset, $items_per_page);
 
+  // Fetch the cats
   $result = $query->execute();
 
   $json_cats = array();
   if (isset($result['node'])) {
+    // We also need the total number of *all* cats for pagination. We only
+    // retrieve this if we have queried a non-empty result set.
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'node')
+      ->entityCondition('bundle', 'cat')
+      ->propertyCondition('status', 1)
+      ->count();
+
+    $count = $query->execute();
+
     $cats_nids = array_keys($result['node']);
     $cats = entity_load('node', $cats_nids);
+
+    // Let's build the array of cats we are going to json-ify.
+    // Should be something like this:
+    //
+    //  $cats['nodes'] = array(
+    //    'node' => array(
+    //      'title' => 'Russian blue',
+    //      'Body' => 'lorem ipsum',
+    //      'Image' => 'http://to-jpg',
+    //    ),
+    //  );
+    //
     foreach ($cats as $cat) {
+      // We use Entity API's entity_metadata_wrapper.
       $cat_wrapper = entity_metadata_wrapper('node', $cat);
 
       $body = $cat_wrapper->body->value();
@@ -94,7 +129,12 @@ function get_all_cats_json_array() {
           'Image' => image_style_url('medium', $image['uri']),
          ),
       );
+      $total++;
     }
+
+    // Set the $cats[total] value with the total number of cats from the entire
+    // result set.
+    $json_cats['total'] = $count;
   }
 
   return $json_cats;
